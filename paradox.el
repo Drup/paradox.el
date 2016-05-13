@@ -1,4 +1,4 @@
-;;; paradox-mode.el --- Major mode for editing Paradox mod files
+;;; paradox.el --- Major mode for editing Paradox mod files
 
 ;; Copyright (C) 2016 Gabriel Radanne
 ;; Licensed under the GNU General Public License.
@@ -22,6 +22,8 @@
 
 (require 'rx)
 (require 'smie)
+(require 'stellaris-list)
+(require 'stellaris-company)
 
 (defgroup paradox nil
   "Major mode to edit Paradox modding files."
@@ -34,8 +36,7 @@
 
 (defvar paradox-mode-map
   (let ((map (make-sparse-keymap)))
-    (define-key map [(backspace)] 'backward-delete-char-untabify)
-    (define-key map [remap newline-and-indent] 'tuareg-newline-and-indent)
+    (define-key map "\C-c\C-t" 'stellaris-show-meta)
     map)
   "Keymap for Paradox major mode")
 
@@ -47,16 +48,44 @@
   (rx (group (optional ?\-)
              (1+ digit)
              (optional ?\. (1+ digit)))))
-(defconst paradox-mode-keyword-re
-  (rx (group (or "yes" "no"))))
+
+(defconst builtins
+  '("yes" "no"))
+(defconst paradox-mode-builtins-re
+  (regexp-opt builtins 'symbols))
+
+(defconst keywords
+  '("trigger" "owner" "from" "prev"))
+(defconst paradox-mode-keywords-re
+  (regexp-opt keywords 'symbols))
+
+;; Stellaris stuff
+(defconst stellaris-effects-re
+  (regexp-opt stellaris-effects 'symbols))
+(defconst stellaris-triggers-re
+  (regexp-opt stellaris-triggers 'symbols))
 
 (defvar paradox-font-lock-keywords
   (list
    (list paradox-mode-quoted-string-re 1 font-lock-string-face)
-   (list paradox-mode-keyword-re 1 font-lock-keyword-face)
+   (list paradox-mode-builtins-re 1 font-lock-constant-face)
    (list paradox-mode-number-re 1 font-lock-constant-face)
+   (list paradox-mode-keywords-re 1 font-lock-keyword-face)
+   (list stellaris-effects-re 1 font-lock-type-face)
+   (list stellaris-triggers-re 1 font-lock-builtin-face)
    )
   "Keyword highlighting specification for `paradox-mode'.")
+
+(defun stellaris-show-meta ()
+  "Show acceptable scope and targets"
+  (interactive)
+  (let* ((minibuffer-message-timeout nil)
+         (cur-word (thing-at-point 'symbol t))
+         (item (member-ignore-case cur-word stellaris-completions)))
+    (if item
+        (minibuffer-message (stellaris-meta (car item)))
+      (minibuffer-message "No info for %s" cur-word)
+      )))
 
 (defvar paradox-syntax-table
   (let ((st (make-syntax-table)))
@@ -95,7 +124,9 @@
 
   :syntax-table paradox-syntax-table
 
-  (setq-local font-lock-defaults '(paradox-font-lock-keywords))
+  (setq-local
+   font-lock-defaults
+   '(paradox-font-lock-keywords nil t))
 
   ;; Paradox files are indented with tabs
   (setq-default indent-tabs-mode t)
@@ -112,3 +143,4 @@
   )
 
 (provide 'paradox)
+;;; paradox.el ends here
