@@ -55,7 +55,7 @@
   (regexp-opt builtins 'symbols))
 
 (defconst keywords
-  '("trigger" "owner" "from" "prev"))
+  '("trigger" "owner" "from" "prev" "limit"))
 (defconst paradox-mode-keywords-re
   (regexp-opt keywords 'symbols))
 
