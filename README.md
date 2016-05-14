@@ -1,10 +1,11 @@
 # Emacs mode to edit [paradox](http://wikis.paradoxplaza.com/) mod files
 
 Tested with stellaris, but should work fine with EU4 and CK2 too.
+Autocompletion for stellaris' events and triggers is available with company-mode.
 
-To install, copy `paradox.el` in `~/.emacs.d/lisp/` and put in your `.emacs`:
+To install, put in your `.emacs`:
 ```elisp
-(add-to-list 'load-path "~/.emacs.d/lisp")
+(add-to-list 'load-path "/path/to/the/repository/")
 (require 'paradox)
 
 ;; Spellchecking in comments and strings
